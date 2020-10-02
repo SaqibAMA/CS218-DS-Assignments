@@ -1,8 +1,12 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <iostream>
 #include <cstring>
+#include <fstream>
 
 using namespace std;
 
+// Doubly Linked List Implementation
 template <typename T>
 class List {
 
@@ -18,7 +22,11 @@ class List {
 		friend class List;
 
 		// Constructor
-		Node(T data = 0) {
+		Node() {
+			prev = next = nullptr;
+		}
+
+		Node(T data) {
 			prev = next = nullptr;
 			this->data = data;
 		}
@@ -76,8 +84,8 @@ public:
 
 		// null <- head -> tail -> null
 
-		head = new Node(0);
-		tail = new Node(0);
+		head = new Node;
+		tail = new Node;
 
 		head->prev = nullptr;
 		head->next = tail;
@@ -110,12 +118,10 @@ public:
 		return it;
 
 	}
-	
 	Iterator& insertAtHead(T data) {
 		Iterator it(head->next);
 		return insertNodeAt(it, data);
 	}
-
 	Iterator& insertAtTail(T data) {
 		Iterator it(tail);
 		return insertNodeAt(it, data);
@@ -145,12 +151,10 @@ public:
 		}
 
 	}
-
 	Iterator& deleteAtHead() {
 		Iterator it(head->next);
 		return deleteNodeAt(it);
 	}
-
 	Iterator& deleteAtTail() {
 		Iterator it(tail->prev);
 		return deleteNodeAt(it);
@@ -161,22 +165,32 @@ public:
 		Iterator it(head->next);
 		return it;
 	}
-
 	Iterator end() const {
 		Iterator it(tail);
 		return it;
 	}
 
-
 	// Custom Member Functions
-
 	bool has(T data) {
 
 		for (auto i = begin(); i != end(); i++)
-			if (*i == data) return false;
+			if (*i == data) return true;
+
+		return false;
 
 	}
+	Iterator& get(T data) {
+		for (auto it = begin(); it != end(); it++)
+			if (*it == data) return it;
+	}
 
+	// Printing function
+	void print () const {
+		
+		for (auto it = begin(); it != end(); it++)
+			cout << *it << endl;
+
+	}
 
 private:
 	Node* head;
@@ -185,23 +199,260 @@ private:
 };
 
 
+class DocInfo {
+
+private:
+	int DocID;
+	int freq;
+
+public:
+
+	// Friendships
+	friend class SearchEngine;
+
+	// Constructor
+	DocInfo(int DocID = 0, int freq = 0) {
+		this->DocID = DocID;
+		this->freq = freq;
+	}
+
+	// Member functions
+	void incrementFrequency() {
+		++freq;
+	}
+
+	void resetFrequency() {
+		freq = 0;
+	}
+
+	// Operators
+	friend ostream& operator << (ostream& out, const DocInfo& D) {
+		
+		out << "DocID: " << D.DocID << " Freq: " << D.freq << endl;
+		return out;
+
+	}
+
+	bool operator == (const DocInfo& D) const {
+
+		return (this->DocID == D.DocID);
+
+	}
+
+	// Destructor
+	// Not needed.
+
+};
+
+// TermInfo Class
+class TermInfo {
+
+private:
+	char* term;
+	List <DocInfo> DI;
+
+public:
+
+	// Constructor
+	TermInfo(const char* term = nullptr) {
+		
+		if (term) {
+
+			this->term = new char[strlen(term) + 1];
+			strcpy(this->term, term);
+
+		}
+		else {
+
+			this->term = nullptr;
+		
+		}
+
+	}
+
+	// Member Functions
+	void addDoc(const DocInfo& D) {
+		DI.insertAtHead(D);
+	}
+
+	DocInfo& getDoc(const DocInfo& D) const {
+		
+		for (auto i = DI.begin(); i != DI.end(); i++)
+			if (*i == D) return *i;
+
+		DocInfo d (-1);
+		return d;
+
+	}
+
+	// Operators
+	bool operator == (const char* term) const {
+		return !(strcmp(this->term, term));
+	}
+
+	bool operator == (const TermInfo& T) const {
+		return !(strcmp(this->term, T.term));
+	}
+
+	TermInfo& operator = (const TermInfo& T) {
+
+		if (this->term) delete[] this->term;
+
+		if (T.term) {
+
+			this->term = new char[strlen(T.term) + 1];
+			strcpy(this->term, T.term);
+
+		}
+		else {
+
+			this->term = nullptr;
+
+		}
+
+		return *this;
+
+
+	}
+
+	TermInfo& operator = (const char* term) {
+
+		if (this->term) delete[] term;
+
+		if (term) {
+
+			this->term = new char[strlen(term) + 1];
+			strcpy(this->term, term);
+
+		}
+		else {
+
+			this->term = nullptr;
+
+		}
+
+	}
+
+	friend ostream& operator << (ostream& out, const TermInfo& T) {
+		
+		if (T.term) {
+			out << "Term: " << T.term << endl;
+			T.DI.print();
+		}
+
+
+		return out;
+
+	}
+
+	// Destructor
+	~TermInfo() {
+		// free(term);
+	}
+
+};
+
+
+
+// Search Engine Class
+class SearchEngine {
+
+private:
+	List <TermInfo> TI;
+
+public:
+	SearchEngine() {
+
+	}
+
+	// Initializer function
+	// for search engine
+	void init() {
+
+		const int indexSize = 4;
+		const char* fileNames[indexSize] = {
+			"files/Doc1.txt",
+			"files/Doc2.txt",
+			"files/Doc3.txt",
+			"files/Doc4.txt",
+		};
+
+		createIndex(fileNames, indexSize);
+
+	}
+
+	// Member functions
+	void createIndex(const char** fileNames, const int indexSize) {
+
+		for (int i = 0; i < indexSize; i++) {
+
+			ifstream fin(fileNames[i]);
+
+			// Creating a DocInfo Entry
+			DocInfo docInfo(i + 1);
+
+			// Reading the file word-by-word
+			while (!fin.eof()) {
+
+				char temp[100];
+				fin >> temp;
+
+				TermInfo termInfo(temp);
+				
+				// If it is a unique word
+				if (!TI.has(termInfo)) {
+
+					docInfo.incrementFrequency();
+					TI.insertAtTail(termInfo);
+
+					auto i = TI.get(termInfo);
+					(*i).addDoc(docInfo);
+
+					docInfo.resetFrequency();
+
+				}
+				else {
+					
+					// If it is not a unique word.
+
+					auto i = TI.get(termInfo);
+					DocInfo& doc = (*i).getDoc(docInfo);
+
+					if (doc.DocID == -1) {
+						
+						docInfo.incrementFrequency();
+						auto i = TI.get(termInfo);
+						(*i).addDoc(docInfo);
+						docInfo.resetFrequency();
+
+					}
+					else {
+						doc.incrementFrequency();
+					}
+
+
+				}
+
+
+			}
+
+			// Closing the file to open a new one.
+			fin.close();
+
+		}
+
+		TI.print();
+
+	}
+
+
+};
+
+
 int main() {
 
-
-	List <int> L;
-
-	L.insertAtHead(5);
-	L.insertAtHead(6);
-	L.insertAtHead(7);
-	L.insertAtTail(7);
-	L.insertAtTail(7);
-	L.deleteAtTail();
-	L.deleteAtTail();
-	L.deleteAtHead();
-
-	for (auto i = L.begin(); i != L.end(); i++) {
-		cout << *i << endl;
-	}
+	SearchEngine s;
+	s.init();
 
 	return 0;
 }
