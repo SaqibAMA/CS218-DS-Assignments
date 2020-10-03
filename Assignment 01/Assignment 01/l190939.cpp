@@ -71,6 +71,10 @@ class List {
 			return (this->curr->data);
 		}
 
+		Node* getAddress() {
+			return curr;
+		}
+
 	private:
 		Node* curr;
 
@@ -179,16 +183,20 @@ public:
 		return false;
 
 	}
+	bool isEmpty() {
+		return (head->next == tail->prev);
+	}
 	Iterator& get(T data) {
 		for (auto it = begin(); it != end(); it++)
 			if (*it == data) return it;
 	}
 
+
 	// Printing function
 	void print () const {
 		
 		for (auto it = begin(); it != end(); it++)
-			cout << *it << endl;
+			cout << *it;
 
 	}
 
@@ -220,7 +228,6 @@ public:
 	void incrementFrequency() {
 		++freq;
 	}
-
 	void resetFrequency() {
 		freq = 0;
 	}
@@ -228,11 +235,10 @@ public:
 	// Operators
 	friend ostream& operator << (ostream& out, const DocInfo& D) {
 		
-		out << "DocID: " << D.DocID << " Freq: " << D.freq << endl;
+		out << "[ID: " << D.DocID << " TF: " << D.freq << "] ";
 		return out;
 
 	}
-
 	bool operator == (const DocInfo& D) const {
 
 		return (this->DocID == D.DocID);
@@ -253,6 +259,9 @@ private:
 
 public:
 
+	// Friendships
+	friend class SearchEngine;
+
 	// Constructor
 	TermInfo(const char* term = nullptr) {
 		
@@ -272,9 +281,8 @@ public:
 
 	// Member Functions
 	void addDoc(const DocInfo& D) {
-		DI.insertAtHead(D);
+		DI.insertAtTail(D);
 	}
-
 	DocInfo& getDoc(const DocInfo& D) const {
 		
 		for (auto i = DI.begin(); i != DI.end(); i++)
@@ -289,11 +297,9 @@ public:
 	bool operator == (const char* term) const {
 		return !(strcmp(this->term, term));
 	}
-
 	bool operator == (const TermInfo& T) const {
 		return !(strcmp(this->term, T.term));
 	}
-
 	TermInfo& operator = (const TermInfo& T) {
 
 		if (this->term) delete[] this->term;
@@ -314,7 +320,6 @@ public:
 
 
 	}
-
 	TermInfo& operator = (const char* term) {
 
 		if (this->term) delete[] term;
@@ -332,13 +337,24 @@ public:
 		}
 
 	}
+	
+	// Setting DocInfo List
+	void setDocInfoList(const TermInfo& T) {
+	
+		auto it = T.DI.begin();
+
+		DI.insertAtTail(*it);
+
+	}
 
 	friend ostream& operator << (ostream& out, const TermInfo& T) {
 		
 		if (T.term) {
-			out << "Term: " << T.term << endl;
+			out << "[" << T.term << "] -> ";
 			T.DI.print();
+			cout << endl;
 		}
+
 
 
 		return out;
@@ -347,7 +363,8 @@ public:
 
 	// Destructor
 	~TermInfo() {
-		// free(term);
+		//if (term) delete[] term;
+		//term = nullptr;
 	}
 
 };
@@ -378,10 +395,14 @@ public:
 		};
 
 		createIndex(fileNames, indexSize);
+		
+		while (true) {
+			search();
+		}
 
 	}
 
-	// Member functions
+	// Function for Indexing
 	void createIndex(const char** fileNames, const int indexSize) {
 
 		for (int i = 0; i < indexSize; i++) {
@@ -441,7 +462,93 @@ public:
 
 		}
 
-		TI.print();
+		 // TI.print();
+
+	}
+
+	// Function for Searching
+	void search() {
+
+		int querySize = 0;
+		char** query = getSearchQuery(querySize);
+
+		int resultSize = 0;
+
+		List <List<DocInfo>*> result;
+
+		for (int i = 0; i < querySize; i++) {
+
+			TermInfo term(query[i]);
+
+			if (TI.has(term)) {
+
+				auto it = TI.get(term);
+				result.insertAtTail(&(*it).DI);
+
+			}
+
+		}
+
+		for (auto i = result.begin(); i != result.end(); i++) {
+			(*(*i)).print();
+			cout << endl;
+		}
+
+	}
+
+
+	// Tokenizer Function
+	char** getSearchQuery(int& querySize) {
+
+		// Data members for necessary operations.
+		// Building on stack because it's efficient.
+
+		const int buffSize = 100;
+		char temp[buffSize];
+
+		char copyBuffer[20][buffSize];
+		int copyBuffIter = 0;
+
+
+		// Taking the query input.
+
+		cout << "Search: ";
+		cin.getline(temp, 100, '\n');
+
+		// Scanning through the whole query
+		// and splitting it into words
+
+		for (int i = 0; temp[i] != '\0' && i <= strlen(temp); i++) {
+
+			int j = i;
+			copyBuffIter = 0;
+			while (temp[j] != '\0' && temp[j] != ' ') {
+			
+				copyBuffer[querySize][copyBuffIter] = temp[j];
+				++j;
+				++copyBuffIter;
+
+			}
+
+			copyBuffer[querySize][copyBuffIter] = '\0';
+			++querySize;
+			i = j;
+
+		}
+
+		// Allocating memory and copying everything
+		// in a dynamic array
+
+		char** tokenizedQuery = new char* [querySize];
+
+		for (int i = 0; i < querySize; i++) {
+			
+			tokenizedQuery[i] = new char[strlen(copyBuffer[i]) + 1];
+			strcpy(tokenizedQuery[i], copyBuffer[i]);
+
+		}
+
+		return tokenizedQuery;
 
 	}
 
