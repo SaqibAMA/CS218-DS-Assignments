@@ -6,6 +6,7 @@
 
 using namespace std;
 
+
 // Doubly Linked List Implementation
 template <typename T>
 class List {
@@ -206,7 +207,7 @@ private:
 	size_t size;
 };
 
-
+// DocInfo Class
 class DocInfo {
 
 private:
@@ -228,6 +229,11 @@ public:
 	void incrementFrequency() {
 		++freq;
 	}
+
+	void incrementFrequency(unsigned int n) {
+		freq += n;
+	}
+
 	void resetFrequency() {
 		freq = 0;
 	}
@@ -303,6 +309,7 @@ public:
 	TermInfo& operator = (const TermInfo& T) {
 
 		if (this->term) delete[] this->term;
+		this->term = nullptr;
 
 		if (T.term) {
 
@@ -363,13 +370,12 @@ public:
 
 	// Destructor
 	~TermInfo() {
+		//cout << "Destructor called for: " << term << endl;
 		//if (term) delete[] term;
 		//term = nullptr;
 	}
 
 };
-
-
 
 // Search Engine Class
 class SearchEngine {
@@ -379,11 +385,10 @@ private:
 
 public:
 	SearchEngine() {
-
+		init();
 	}
 
-	// Initializer function
-	// for search engine
+	// Initializer function.
 	void init() {
 
 		const int indexSize = 4;
@@ -466,8 +471,12 @@ public:
 
 	}
 
-	// Function for Searching
+	// Function for Searching.
+	// Responsible for taking input and
+	// finding it in the index.
 	void search() {
+
+		List <TermInfo> searchTerms;
 
 		int querySize = 0;
 		char** query = getSearchQuery(querySize);
@@ -484,15 +493,72 @@ public:
 
 				auto it = TI.get(term);
 				result.insertAtTail(&(*it).DI);
+				searchTerms.insertAtTail(term);
 
 			}
 
 		}
 
+		createRankings(searchTerms, result);
+
+	}
+
+
+	// Rankings Function.
+	// Responsible for printing documents
+	// according to specified ranking algo.
+	void createRankings(List<TermInfo> searchTerms, List<List<DocInfo>*> result) {
+
+		auto searchTermsIter = searchTerms.begin();
 		for (auto i = result.begin(); i != result.end(); i++) {
+			cout << *searchTermsIter;
+			searchTermsIter++;
 			(*(*i)).print();
 			cout << endl;
 		}
+
+		List <DocInfo> documentList;
+
+		for (auto i = result.begin(); i != result.end(); i++) {
+
+			for (auto j = (*(*i)).begin(); j != (*(*i)).end(); j++) {
+
+				documentList.insertAtTail(*j);
+
+			}
+
+		}
+
+		cout << "documentsList: " << endl;
+		documentList.print();
+		cout << endl;
+
+		getDocumentFrequencies(documentList);
+
+
+	}
+
+	void getDocumentFrequencies(List <DocInfo> documentList) {
+
+		List <DocInfo> uniqueDocs;
+
+		for (auto i = documentList.begin(); i != documentList.end(); i++) {
+
+
+			if (!uniqueDocs.has(*i)) {
+				uniqueDocs.insertAtTail(*i);
+			}
+			else {
+				auto iter = uniqueDocs.get(*i);
+				(*iter).freq += (*i).freq;
+			}
+
+
+		}
+
+		uniqueDocs.print();
+
+		/*documentList.print();*/
 
 	}
 
@@ -555,11 +621,9 @@ public:
 
 };
 
-
 int main() {
 
 	SearchEngine s;
-	s.init();
 
 	return 0;
 }
