@@ -7,6 +7,22 @@
 using namespace std;
 
 
+// Related to Graphics
+#include <Windows.h>
+HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+
+
+void gotoxy(int x, int y) {
+
+	COORD scrn;
+	scrn.X = x;
+	scrn.Y = y;
+
+	SetConsoleCursorPosition(h, scrn);
+
+}
+
+
 // Doubly Linked List Implementation
 template <typename T>
 class List {
@@ -190,6 +206,7 @@ public:
 	Iterator& get(T data) {
 		for (auto it = begin(); it != end(); it++)
 			if (*it == data) return it;
+
 	}
 
 
@@ -218,6 +235,7 @@ public:
 
 	// Friendships
 	friend class SearchEngine;
+	friend class Rank;
 
 	// Constructor
 	DocInfo(int DocID = 0, int freq = 0) {
@@ -357,7 +375,7 @@ public:
 	friend ostream& operator << (ostream& out, const TermInfo& T) {
 		
 		if (T.term) {
-			out << "[" << T.term << "] -> ";
+			out << "[" << T.term << "]";
 			T.DI.print();
 			cout << endl;
 		}
@@ -377,11 +395,60 @@ public:
 
 };
 
+// Ranking Class
+class Rank {
+public:
+	int docId;
+	int collectiveFreq;
+	int keywords;
+
+public:
+	Rank() {
+		docId = collectiveFreq = keywords = 0;
+	}
+
+	Rank(const DocInfo& D) {
+
+		docId = D.DocID;
+		collectiveFreq = D.freq;
+		keywords = 1;
+
+	}
+
+	bool operator == (const Rank& R) const {
+	
+		return (docId == R.docId);
+
+	}
+
+	bool operator != (const Rank& R) const {
+
+		return (docId == R.docId);
+
+	}
+
+	friend ostream& operator << (ostream& out, const Rank& R) {
+
+		out << "[ID: " << R.docId << "] " << "[CF: " << R.collectiveFreq << "] " << "[Keywords: " << R.keywords << "].";
+
+		return out;
+	}
+
+	~Rank() {
+		docId = collectiveFreq = keywords = 0;
+	}
+
+};
+
 // Search Engine Class
 class SearchEngine {
 
 private:
 	List <TermInfo> TI;
+
+	// For Graphics
+	const int screenTop = 5;
+	const int screenSide = 35;
 
 public:
 	SearchEngine() {
@@ -389,6 +456,13 @@ public:
 	}
 
 	// Initializer function.
+
+	/*
+	
+	This function contains the main loop for operating the search engine.
+
+	*/
+
 	void init() {
 
 		const int indexSize = 4;
@@ -402,12 +476,20 @@ public:
 		createIndex(fileNames, indexSize);
 		
 		while (true) {
+			setupScreen();
 			search();
 		}
 
 	}
 
 	// Function for Indexing
+
+	/*
+	
+	This function creates an index according to the specified requirements.
+
+	*/
+
 	void createIndex(const char** fileNames, const int indexSize) {
 
 		for (int i = 0; i < indexSize; i++) {
@@ -472,8 +554,12 @@ public:
 	}
 
 	// Function for Searching.
-	// Responsible for taking input and
-	// finding it in the index.
+	/*
+	
+	This function takes input and calls the tokenizer function to parse it.
+	Then it searches the input using the index.
+
+	*/
 	void search() {
 
 		List <TermInfo> searchTerms;
@@ -505,17 +591,34 @@ public:
 
 
 	// Rankings Function.
-	// Responsible for printing documents
-	// according to specified ranking algo.
+
+	/*
+	
+	This does not necessarily calculate the ranking, however, it combines all the docs
+	and pushes them into calculateRankings() function.
+
+	Also, it brings out unique terms in the query.
+
+	*/
+
 	void createRankings(List<TermInfo> searchTerms, List<List<DocInfo>*> result) {
 
 		auto searchTermsIter = searchTerms.begin();
+
+		SetConsoleTextAttribute(h, 10);
+		
+		int deviation = 0;
+
 		for (auto i = result.begin(); i != result.end(); i++) {
+			gotoxy(screenSide + deviation, screenTop + 4);
 			cout << *searchTermsIter;
 			searchTermsIter++;
-			(*(*i)).print();
-			cout << endl;
+			deviation += 15;
+
 		}
+
+		SetConsoleTextAttribute(h, 15);
+
 
 		List <DocInfo> documentList;
 
@@ -529,41 +632,133 @@ public:
 
 		}
 
-		cout << "documentsList: " << endl;
-		documentList.print();
-		cout << endl;
-
-		getDocumentFrequencies(documentList);
+		calculateRankings(documentList);
 
 
 	}
 
-	void getDocumentFrequencies(List <DocInfo> documentList) {
+	// Calculate Ranking Function
+	/*
+	
+	This function implements the ranking algorithm as well as
+	filter out the document data.
 
-		List <DocInfo> uniqueDocs;
+	*/
+
+	void calculateRankings(List <DocInfo> documentList) {
+
+		List <Rank> rankings;			// Keeps the actual ranking.
+		List <DocInfo> uniqueDocs;		// Keeps the list of documents uniquely.
+
+
+		// This loop performs crucial functions of:
+		// a) Collecting all the documents currently under analysis.
+		// b) Remove duplicates from that linked list.
+		// c) Calculate CF and Keyword Count for the Rank object.
 
 		for (auto i = documentList.begin(); i != documentList.end(); i++) {
 
+			Rank docRank(*i);
+
+			// If the doc is not in, put it in.
+			// If it is already present, iterate the keyword count and update CF.
 
 			if (!uniqueDocs.has(*i)) {
 				uniqueDocs.insertAtTail(*i);
+
+				rankings.insertAtTail(docRank);
 			}
 			else {
 				auto iter = uniqueDocs.get(*i);
 				(*iter).freq += (*i).freq;
-			}
 
+				auto r = rankings.get(*i);
+				(*r).collectiveFreq += (*i).freq;
+				(*r).keywords += 1;
+
+			}
 
 		}
 
-		uniqueDocs.print();
 
-		/*documentList.print();*/
+		// Ranking Algorithm Implementation.
+		// Works in O(n^2) to compare all elements
+		// with each other and swaps data based on conditions.
+
+		for (auto i = rankings.begin(); i != rankings.end(); i++) {
+		
+			for (auto j = rankings.begin(); j != rankings.end(); j++) {
+
+				// Implementation of the ranking algorithm
+
+				// a) If keyword count is greater, then rank higher.
+				// b) If keyword count is equal, but TF is higher, then rank higher.
+				// c) If keyword count and TF are equal respectively, then rank higher on the basis of ID.
+
+				if (
+					((*i).keywords > (*j).keywords) ||
+
+					((*i).keywords == (*j).keywords &&
+					(*i).collectiveFreq > (*j).collectiveFreq) ||
+					
+					((*i).keywords == (*j).keywords &&
+					(*i).collectiveFreq == (*j).collectiveFreq &&
+					(*i).docId < (*j).docId)
+					
+					) {
+				
+					swap((*i).keywords, (*j).keywords);
+					swap((*i).collectiveFreq, (*j).collectiveFreq);
+					swap((*i).docId, (*j).docId);
+				
+				}
+
+			}
+		
+		}
+
+
+		// Printing all the search results on the screen.
+
+		SetConsoleTextAttribute(h, 4 | BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_INTENSITY);
+		int deviation = 4;
+		for (auto i = rankings.begin(); i != rankings.end(); i++) {
+
+			gotoxy(screenSide, screenTop + deviation);
+			cout << "                                               " << endl;
+			gotoxy(screenSide, screenTop + 1 + deviation);
+			cout << "                                               " << endl;
+			gotoxy(screenSide, screenTop + 1 + deviation);
+			cout << "  " << *i << "     " << endl;
+			gotoxy(screenSide, screenTop + 2 + deviation);
+			cout << "                                               " << endl;
+
+			// Deviation pushes the cursor alone y-axis based
+			// on what iteration we are on.
+
+			deviation += 4;
+
+		}
+		SetConsoleTextAttribute(h, 15);
+
+
+		// To avoid instant clearing of screen
+		// and eventually clear it for repeated use.
+
+		cin.get();
+		system("cls");
 
 	}
 
-
 	// Tokenizer Function
+
+	/*
+	
+	This takes a variable query size that keeps a record
+	of the total number of words in the query.
+
+	*/
+
 	char** getSearchQuery(int& querySize) {
 
 		// Data members for necessary operations.
@@ -578,13 +773,13 @@ public:
 
 		// Taking the query input.
 
-		cout << "Search: ";
+		cout << ">>: ";
 		cin.getline(temp, 100, '\n');
 
 		// Scanning through the whole query
 		// and splitting it into words
 
-		for (int i = 0; temp[i] != '\0' && i <= strlen(temp); i++) {
+		for (unsigned int i = 0; temp[i] != '\0' && i <= strlen(temp); i++) {
 
 			int j = i;
 			copyBuffIter = 0;
@@ -618,6 +813,30 @@ public:
 
 	}
 
+	// Screen Setup Function
+
+	/*
+	
+	This function sets up the search console by printing it
+	on specific coordinates. This is called every time we
+	perform a search so that the screen is reset.
+
+	*/
+
+	void setupScreen() {
+
+		// Printing the search bar
+
+		SetConsoleTextAttribute(h, 0 | BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_INTENSITY);
+		gotoxy(screenSide, screenTop);
+		cout << "                                               " << endl;
+		gotoxy(screenSide, screenTop + 1);
+		cout << "                                               " << endl;
+		gotoxy(screenSide, screenTop + 2);
+		cout << "                                               " << endl;
+		gotoxy(screenSide + 1, screenTop + 1);
+
+	}
 
 };
 
