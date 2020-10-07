@@ -6,11 +6,32 @@
 
 using namespace std;
 
+int totalBlocksAllocated = 0;
+
+//void* operator new (size_t size) {
+//
+//	cout << "Allocated Block # " << ++totalBlocksAllocated << endl;
+//	return malloc(size);
+//
+//}
+//
+//void operator delete (void* mem) {
+//
+//	cout << "Allocated Block # " << --totalBlocksAllocated << endl;
+//	free(mem);
+//
+//}
 
 // Related to Graphics
 #include <Windows.h>
+
+// Handle for all graphics functionality.
 HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 
+// GotoXY
+
+// This function allows to move the cursor
+// to any (x, y)
 
 void gotoxy(int x, int y) {
 
@@ -88,9 +109,9 @@ class List {
 			return (this->curr->data);
 		}
 
-		Node* getAddress() {
-			return curr;
-		}
+		//Node* getAddress() {
+		//	return curr;
+		//}
 
 	private:
 		Node* curr;
@@ -200,6 +221,7 @@ public:
 		return false;
 
 	}
+
 	bool isEmpty() {
 		return (head->next == tail->prev);
 	}
@@ -215,6 +237,25 @@ public:
 		
 		for (auto it = begin(); it != end(); it++)
 			cout << *it;
+
+	}
+
+	// Destructor
+	~List() {
+
+		/*if (head) {
+
+			Node* it = head;
+
+			while (it) {
+
+				Node* next = it->next;
+				delete it;
+				it = next;
+
+			}
+
+		}*/
 
 	}
 
@@ -324,9 +365,11 @@ public:
 	bool operator == (const TermInfo& T) const {
 		return !(strcmp(this->term, T.term));
 	}
+
+
 	TermInfo& operator = (const TermInfo& T) {
 
-		if (this->term) delete[] this->term;
+		if (this->term) delete this->term;
 		this->term = nullptr;
 
 		if (T.term) {
@@ -347,7 +390,12 @@ public:
 	}
 	TermInfo& operator = (const char* term) {
 
-		if (this->term) delete[] term;
+		cout << "Changing term from: ";
+		if (this->term) cout << this->term;
+		cout << " to " << term;
+
+		if (this->term) delete[] this->term;
+		this->term = nullptr;
 
 		if (term) {
 
@@ -388,9 +436,8 @@ public:
 
 	// Destructor
 	~TermInfo() {
-		//cout << "Destructor called for: " << term << endl;
-		//if (term) delete[] term;
-		//term = nullptr;
+		/*free(term);
+		term = nullptr;*/
 	}
 
 };
@@ -450,6 +497,8 @@ private:
 	const int screenTop = 5;
 	const int screenSide = 35;
 
+	unsigned int docsIndexed;
+
 public:
 	SearchEngine() {
 		init();
@@ -467,10 +516,10 @@ public:
 
 		const int indexSize = 4;
 		const char* fileNames[indexSize] = {
-			"files/Doc1.txt",
-			"files/Doc2.txt",
-			"files/Doc3.txt",
-			"files/Doc4.txt",
+			"files/_Doc1.txt",
+			"files/_Doc2.txt",
+			"files/_Doc3.txt",
+			"files/_Doc4.txt",
 		};
 
 		createIndex(fileNames, indexSize);
@@ -495,6 +544,10 @@ public:
 		for (int i = 0; i < indexSize; i++) {
 
 			ifstream fin(fileNames[i]);
+			if (!fin) {
+				cerr << "Something is wrong with files." << endl;
+				system("pause");
+			}
 
 			// Creating a DocInfo Entry
 			DocInfo docInfo(i + 1);
@@ -506,6 +559,8 @@ public:
 				fin >> temp;
 
 				TermInfo termInfo(temp);
+
+				// cout << "TermInfo at this point: " << termInfo << endl;
 				
 				// If it is a unique word
 				if (!TI.has(termInfo)) {
@@ -549,6 +604,8 @@ public:
 
 		}
 
+		docsIndexed = indexSize;
+
 		 // TI.print();
 
 	}
@@ -566,6 +623,8 @@ public:
 
 		int querySize = 0;
 		char** query = getSearchQuery(querySize);
+
+		if (query[0][0] == '+') addFileToIndex(query[1]);
 
 		int resultSize = 0;
 
@@ -586,6 +645,86 @@ public:
 		}
 
 		createRankings(searchTerms, result);
+
+	}
+
+
+	// Add File to Index
+
+	/*
+	
+	This function adds a file to the index.
+
+	*/
+
+	void addFileToIndex(char* fileName) {
+
+		// cout << "Parsing" << endl;
+
+		ifstream fin(fileName);
+		if (fin) {
+
+			// Creating a DocInfo Entry
+			DocInfo docInfo(++docsIndexed);
+
+			// Reading the file word-by-word
+			while (!fin.eof()) {
+
+				char temp[100];
+				fin >> temp;
+
+				TermInfo termInfo(temp);
+
+				// If it is a unique word
+				if (!TI.has(termInfo)) {
+
+					docInfo.incrementFrequency();
+					TI.insertAtTail(termInfo);
+
+					auto i = TI.get(termInfo);
+					(*i).addDoc(docInfo);
+
+					docInfo.resetFrequency();
+
+				}
+				else {
+
+					// If it is not a unique word.
+
+					auto i = TI.get(termInfo);
+					DocInfo& doc = (*i).getDoc(docInfo);
+
+					if (doc.DocID == -1) {
+
+						docInfo.incrementFrequency();
+						auto i = TI.get(termInfo);
+						(*i).addDoc(docInfo);
+						docInfo.resetFrequency();
+
+					}
+					else {
+						doc.incrementFrequency();
+					}
+
+
+				}
+
+
+			}
+
+
+			SetConsoleTextAttribute(h, 6 | BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_INTENSITY);
+			gotoxy(screenSide, screenTop + 5);
+			cout << "                                               " << endl;
+			gotoxy(screenSide, screenTop + 6);
+			cout << "  [File Indexed]                               " << endl;
+			gotoxy(screenSide, screenTop + 7);
+			cout << "                                               " << endl;
+
+
+		}
+
+		fin.close();
 
 	}
 

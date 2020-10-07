@@ -145,6 +145,11 @@
     <Text Include="files\Doc2.txt" />
     <Text Include="files\Doc3.txt" />
     <Text Include="files\Doc4.txt" />
+    <Text Include="_Doc1.txt" />
+    <Text Include="_Doc2.txt" />
+    <Text Include="_Doc3.txt" />
+    <Text Include="_Doc4.txt" />
+    <Text Include="_Doc5.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

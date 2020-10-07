@@ -1,13 +1,13 @@
 ﻿  l190939.cpp
-D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(210): warning C4715: 'List<TermInfo>::get': not all control paths return a value
-D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(208): warning C4172: returning address of local variable or temporary: it
-D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(316): warning C4172: returning address of local variable or temporary: d
-D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(139): warning C4172: returning address of local variable or temporary: it
-D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(139): warning C4172: returning address of local variable or temporary: it
-D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(139): warning C4172: returning address of local variable or temporary: it
-D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(210): warning C4715: 'List<DocInfo>::get': not all control paths return a value
-D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(208): warning C4172: returning address of local variable or temporary: it
-D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(210): warning C4715: 'List<Rank>::get': not all control paths return a value
-D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(208): warning C4172: returning address of local variable or temporary: it
-D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(139): warning C4172: returning address of local variable or temporary: it
+D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(232): warning C4715: 'List<TermInfo>::get': not all control paths return a value
+D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(230): warning C4172: returning address of local variable or temporary: it
+D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(357): warning C4172: returning address of local variable or temporary: d
+D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(160): warning C4172: returning address of local variable or temporary: it
+D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(160): warning C4172: returning address of local variable or temporary: it
+D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(160): warning C4172: returning address of local variable or temporary: it
+D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(232): warning C4715: 'List<DocInfo>::get': not all control paths return a value
+D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(230): warning C4172: returning address of local variable or temporary: it
+D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(232): warning C4715: 'List<Rank>::get': not all control paths return a value
+D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(230): warning C4172: returning address of local variable or temporary: it
+D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Assignment 01\l190939.cpp(160): warning C4172: returning address of local variable or temporary: it
   Assignment 01.vcxproj -> D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 01\Debug\Assignment 01.exe

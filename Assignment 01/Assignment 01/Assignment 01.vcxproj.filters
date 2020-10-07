@@ -35,5 +35,20 @@
     <Text Include="files\Doc4.txt">
       <Filter>Source Files\files</Filter>
     </Text>
+    <Text Include="_Doc1.txt">
+      <Filter>Source Files\files</Filter>
+    </Text>
+    <Text Include="_Doc2.txt">
+      <Filter>Source Files\files</Filter>
+    </Text>
+    <Text Include="_Doc3.txt">
+      <Filter>Source Files\files</Filter>
+    </Text>
+    <Text Include="_Doc4.txt">
+      <Filter>Source Files\files</Filter>
+    </Text>
+    <Text Include="_Doc5.txt">
+      <Filter>Source Files\files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
