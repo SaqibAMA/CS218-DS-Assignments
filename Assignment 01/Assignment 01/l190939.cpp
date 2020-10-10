@@ -625,6 +625,7 @@ public:
 		char** query = getSearchQuery(querySize);
 
 		if (query[0][0] == '+') addFileToIndex(query[1]);
+		if (query[0][0] == '!') showIndex();
 
 		int resultSize = 0;
 
@@ -645,6 +646,25 @@ public:
 		}
 
 		createRankings(searchTerms, result);
+
+	}
+
+
+	// Show Index
+
+	/*
+	
+	This function allows user to conveniently peek into the
+	index and see the current situation.
+
+	*/
+
+	void showIndex() {
+
+		
+		SetConsoleTextAttribute(h, 15);
+		gotoxy(0, screenTop + 5);
+		TI.print();
 
 	}
 
