@@ -1,3 +1,5 @@
 ﻿  l190939.cpp
-D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 02\Assignment 02\l190939.cpp(104,21): warning C4018: '<': signed/unsigned mismatch
+D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 02\Assignment 02\l190939.cpp(112,21): warning C4018: '<': signed/unsigned mismatch
+D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 02\Assignment 02\l190939.cpp(152,21): warning C4018: '<': signed/unsigned mismatch
+D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 02\Assignment 02\l190939.cpp(157,22): warning C4018: '<': signed/unsigned mismatch
   Assignment 02.vcxproj -> D:\FAST\Semester 03\Data Structures\Assignments\CS218-DS-Assignments\Assignment 02\Debug\Assignment 02.exe

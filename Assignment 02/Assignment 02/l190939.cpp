@@ -1,6 +1,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <math.h>
+
+#include <stack>
 
 using namespace std;
 
@@ -53,10 +56,8 @@ public:
 
 	friend ostream& operator << (ostream& out, const Stage& S) {
 	
-		out << ":: TASK DETAIL ::" << endl;
-		out << "Name: " << S.name << endl;
-		out << "Points: " << S.points << endl;
-		out << "Time: " << S.time << endl;
+		out << "[ Name: " << S.name << "; Points: "
+			<< S.points << "; Time: " << S.time <<  "]";
 
 		return out;
 
@@ -92,6 +93,13 @@ public:
 
 	void getStages() {
 
+		/*
+		
+		This function is responsible for taking
+		the input of stages from the user.
+
+		*/
+
 		unsigned int totalStages;
 		cout << "Total Stages: ";
 		cin >> totalStages;
@@ -110,11 +118,88 @@ public:
 
 	}
 
+	// Iterative Solution
+
+	unsigned int getCummulativeTime(stack <Stage> stageCombination) {
+	
+		unsigned int totalTime = 0;
+
+		while (!stageCombination.empty()) {
+			totalTime += stageCombination.top().time;
+			stageCombination.pop();
+		}
+
+		return totalTime;
+
+	}
+
+	void findOptimalStagesIteratively() {
+
+		/*
+		
+		This algorithm finds the optimal solution
+		for the stage problem using an iterative
+		approach.
+
+		*/
+
+		stack <stack<Stage>> stageCombinations;
+
+		unsigned int powerSetSize = (int)pow(2, stages.size());
+
+		for (int i = 0; i < powerSetSize; i++) {
+
+			stack <Stage> currentSet;
+			bool isWithinThreshold = true;
+
+			for (int j = 0; j < stages.size() && isWithinThreshold; j++) {
+
+				if (i & (1 << j)) {
+
+					currentSet.push(stages[j]);
+
+					if (getCummulativeTime(currentSet) > timeToSpare) {
+						isWithinThreshold = false;
+					}
+					
+				}
+
+			}
+
+			if (isWithinThreshold) {
+				stageCombinations.push(currentSet);
+			}
+
+		}
+
+
+		cout << "\n\n\n\n\n";
+
+
+		while (!stageCombinations.empty()) {
+			
+			stack <Stage> temp = stageCombinations.top();
+			
+			while (!temp.empty()) {
+				cout << temp.top() << ",";
+				temp.pop();
+			}
+
+			cout << endl;
+
+			stageCombinations.pop();
+
+		}
+
+	}
+
 };
 
 int main() {
 
 	MindThrashing game;
+
+	game.findOptimalStagesIteratively();
 
 	return 0;
 }

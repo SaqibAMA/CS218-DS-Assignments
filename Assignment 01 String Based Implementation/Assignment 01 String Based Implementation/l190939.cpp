@@ -315,10 +315,6 @@ public:
 
 		if (head && tail) {
 
-			/*cout << "Destructor called. " << endl;
-			for (auto it = begin(); it != end(); ++it)
-				cout << it.curr->prev << " <- " << it.curr << " -> " << it.curr->next << endl;*/
-
 			Node* curr = head;
 			Node* next = head->next;
 
