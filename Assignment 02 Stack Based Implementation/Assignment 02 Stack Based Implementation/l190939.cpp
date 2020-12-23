@@ -208,6 +208,18 @@ public:
 		return *this;
 	}
 
+	// Equality Operator
+	bool operator == (const Stage& s) {
+		return (
+			this->name == s.name &&
+			this->points == s.points &&
+			this->time == s.time);
+	}
+
+	bool operator != (const Stage& s) {
+		return !(*this == s);
+	}
+
 	// Destructor
 	~Stage() {
 		name = "";
@@ -322,6 +334,12 @@ public:
 		findOptimalStagesRecursively(stages, stages.size(),
 			subset, activationRecord, optimalChoice);
 
+
+		cout << "\n\nTIME CONSTRAINT: " << timeToSpare << endl;
+
+		cout << "\n\nBEST CHOICE: " << endl;
+
+
 		printStack(optimalChoice);
 
 	}
@@ -332,16 +350,19 @@ public:
 		stack <int> & activationRecord,
 		stack <Stage> & optimalChoice) {
 
+		// Fetching the values that
+		// were pushed through the stack.
 		int _subIndex = activationRecord.top();
 		activationRecord.pop();
 		int _setIndex = activationRecord.top();
 		activationRecord.pop();
 
-		// cout << "(" << _subIndex << ", " << _setIndex << ")" << endl;
-
-
+		// Base case, we have traversed
+		// all of the stages.
 		if (_setIndex == size) {
 
+			// Consistently keep the
+			// optimal subset in the stack.
 			if (getCummulativePoints(subset) > getCummulativePoints(optimalChoice)) {
 						
 				if (!optimalChoice.empty() &&
@@ -359,16 +380,23 @@ public:
 		}
 		else {
 
+			// Pops up the stack until a certain size.
 			while (subset.size() > _subIndex) {
 				subset.pop();
 			}
 			subset.push(stages[_setIndex]);
 
+
+			// If we have crossed the time threshold, it is not worth it
+			// to go forward.
 			if (getCummulativeTime(subset) > timeToSpare) return;
 
+			// This pushes the next pair on the stack
+			// for further subset generation.
 			activationRecord.push(_setIndex + 1);
 			activationRecord.push(_subIndex + 1);
 
+			// First recursion call that includes the element.
 			findOptimalStagesRecursively(stages, size,
 				subset, activationRecord, optimalChoice);
 			
@@ -377,6 +405,7 @@ public:
 
 			subset.pop();
 
+			// Second recursion call that excludes the element.
 			findOptimalStagesRecursively(stages, stages.size(),
 				subset, activationRecord, optimalChoice);
 
@@ -386,11 +415,161 @@ public:
 
 	}
 
+	/*
+
+	// Iterative Solution
+	void findOptimalStagesIteratively() {
+
+		stack <int> activationRecord;
+		stack <Stage> optimalChoice;
+		stack <Stage> subset;
+
+
+
+		unsigned long long int powerSetSize = (int)pow(2, stages.size());
+
+		for (unsigned int i = 0; i < powerSetSize; i++) {
+
+			bool isWithinThreshold = true;									// Terminates the loop if
+																			// a certain subset goes out
+																			// of bounds.
+
+			for (unsigned int j = 0; j < stages.size() && isWithinThreshold; j++) {
+
+				if (i & (1 << j)) {
+
+					subset.push(stages[j]);
+					isWithinThreshold = !(getCummulativeTime(subset) > timeToSpare);
+				
+				}
+
+				if (!isWithinThreshold) {
+
+					while (!subset.empty()) {
+						subset.pop();
+					}
+
+				}
+
+			}
+
+
+			if (getCummulativePoints(subset) > getCummulativePoints(optimalChoice)) {
+
+				if (!optimalChoice.empty() &&
+					getCummulativeTime(subset) <= getCummulativeTime(optimalChoice)) {
+					optimalChoice = subset;
+				}
+				else {
+					optimalChoice = subset;
+				}
+
+			}
+
+
+			while (!subset.empty()) {
+				subset.pop();
+			}
+
+
+		}
+
+
+		printStack(optimalChoice);
+
+
+
+	}
+
+	*/
+
+
+	// Iterative Approach
+	void printBestStage(stack<stack<Stage>> stageCombinations) {
+
+		// Finding the optimal set of stages.
+
+		stack <Stage> bestCombinationSoFar;								// Keeps the best choice so far
+
+		while (!stageCombinations.empty()) {							// Do until the provided stack is empty.
+
+			stack <Stage> currentEntry = stageCombinations.top();		// Take the top stack
+
+			if (getCummulativePoints(currentEntry)						// Scan all of it's entries and
+				> getCummulativePoints(bestCombinationSoFar)) {			// compare it with the best choice.
+
+				bestCombinationSoFar = currentEntry;
+
+			}
+
+			stageCombinations.pop();
+
+		}
+
+		cout << "\n\nTIME CONSTRAINT: " << timeToSpare << endl;
+
+		cout << "\n\nBEST CHOICE: " << endl;							// Print the best choice
+		
+		while (!bestCombinationSoFar.empty()) {							// from the provided stack.
+
+			cout << bestCombinationSoFar.top() << endl;
+			bestCombinationSoFar.pop();
+
+		}
+
+	}
+
+	// Iterative Solution
+	void findOptimalStagesIteratively() {
+
+		/*
+
+		This algorithm finds the optimal solution
+		for the stage problem using an iterative
+		approach.
+
+		*/
+
+		// Generating combinations.
+
+		stack <stack<Stage>> stageCombinations;								// Holds all combinations
+
+		unsigned int powerSetSize = (int)pow(2, stages.size());
+
+		for (unsigned int i = 0; i < powerSetSize; i++) {
+
+			stack <Stage> currentSet;										// Holds current subset.
+
+			bool isWithinThreshold = true;									// Terminates the loop if
+																			// a certain subset goes out
+																			// of bounds.
+
+			for (unsigned int j = 0; j < stages.size() && isWithinThreshold; j++) {
+
+				if (i & (1 << j)) {
+					currentSet.push(stages[j]);
+					isWithinThreshold = !(getCummulativeTime(currentSet) > timeToSpare);
+				}
+
+			}
+
+			if (isWithinThreshold) {
+				stageCombinations.push(currentSet);							// Push the combination
+																			// only if it is under time.
+			}
+
+		}
+
+		printBestStage(stageCombinations);									// Printing the best possible stage.
+
+	}
+
 	// printing function
-	void printStack(stack <Stage> s) {
+	template <typename T>
+	void printStack(stack <T> s) {
 
 		while (!s.empty()) {
-			cout << s.top() << ", ";
+			cout << s.top() << endl;
 			s.pop();
 		}
 
@@ -413,6 +592,7 @@ int main() {
 
 	MindThrashing game;
 	game.findOptimalStagesRecursively();
+	game.findOptimalStagesIteratively();
 
 	return 0;
 }

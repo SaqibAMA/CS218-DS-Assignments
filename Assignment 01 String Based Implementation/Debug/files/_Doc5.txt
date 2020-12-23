@@ -1,0 +1,1 @@
+way implement tree each node besides data link each child node number child per node vary great known advance might infeasible make child direct link data structure too much waste space solution simple keep child node linked list tree node

@@ -1,0 +1,2 @@
+linked list consist series nodes adjacent memory node contain element link node contain successor
+call next link last cell next link point nullptr
