@@ -1,0 +1,8 @@
+7
+1,  office1
+2,  lab1
+3,  lab 4
+4,  lab 9
+5,  lab 10
+6,  office2
+7,  office6

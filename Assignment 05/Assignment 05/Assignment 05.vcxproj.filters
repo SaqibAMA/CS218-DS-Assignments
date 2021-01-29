@@ -19,4 +19,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="nodes.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+    <Text Include="prims.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+    <Text Include="testcase1.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+    <Text Include="nodes2.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+    <Text Include="debug.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+  </ItemGroup>
 </Project>
